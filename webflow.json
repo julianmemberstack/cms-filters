@@ -1,0 +1,17 @@
+{
+  "library": {
+    "name": "CMS Filters",
+    "components": [
+      "./src/**/*.webflow.@(js|jsx|mjs|ts|tsx)"
+    ],
+    "description": "A flexible way to filter your CMS lists with Code Components.",
+    "id": "cms-filters"
+  },
+  "telemetry": {
+    "global": {
+      "allowTelemetry": true,
+      "lastPrompted": 1761562368411,
+      "version": "1.8.46"
+    }
+  }
+}
