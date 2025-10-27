@@ -165,27 +165,68 @@ export const CMSFilterSearch = ({
     return pages;
   };
 
+  // Convert hex color to HSL for CSS variable
+  const hexToHSL = (hex) => {
+    // Remove # if present
+    hex = hex.replace(/^#/, '');
+
+    // Parse hex values
+    const r = parseInt(hex.substring(0, 2), 16) / 255;
+    const g = parseInt(hex.substring(2, 4), 16) / 255;
+    const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+      h = s = 0;
+    } else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+      }
+    }
+
+    h = Math.round(h * 360);
+    s = Math.round(s * 100);
+    l = Math.round(l * 100);
+
+    return `${h} ${s}% ${l}%`;
+  };
+
+  // Create style object with CSS variables
+  const customStyles = {
+    '--primary': hexToHSL(accentColor),
+    '--primary-foreground': '0 0% 100%',
+    '--radius': borderRadius,
+  };
+
   if (isLoading) {
     return (
-      <div className="p-4 text-center text-muted-foreground font-[inherit]">
+      <div className="p-4 text-center text-muted-foreground">
         Loading all items...
       </div>
     );
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full" style={customStyles}>
       {/* Search Input */}
       <Input
         type="text"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         placeholder={placeholder}
-        className="mb-4 font-[inherit]"
+        className="mb-4"
       />
 
       {/* Results Info */}
-      <div className="text-muted-foreground mb-4 font-[inherit]">
+      <div className="text-muted-foreground mb-4">
         Showing {filteredItems.length} result{filteredItems.length !== 1 ? "s" : ""}
       </div>
 
@@ -197,7 +238,6 @@ export const CMSFilterSearch = ({
             onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
             variant="outline"
-            className="font-[inherit]"
           >
             Previous
           </Button>
@@ -208,7 +248,7 @@ export const CMSFilterSearch = ({
               return (
                 <span
                   key={`ellipsis-${index}`}
-                  className="px-2 font-[inherit]"
+                  className="px-2"
                 >
                   ...
                 </span>
@@ -220,8 +260,7 @@ export const CMSFilterSearch = ({
                 key={page}
                 onClick={() => setCurrentPage(page)}
                 variant={currentPage === page ? "default" : "outline"}
-                size="sm"
-                className="min-w-10 font-[inherit]"
+                className="min-w-10"
               >
                 {page}
               </Button>
@@ -235,7 +274,6 @@ export const CMSFilterSearch = ({
             }
             disabled={currentPage === totalPages}
             variant="outline"
-            className="font-[inherit]"
           >
             Next
           </Button>
