@@ -1,6 +1,7 @@
 import { CMSFilterSearch } from './CMSFilterSearch';
 import { props } from '@webflow/data-types';
 import { declareComponent } from '@webflow/react';
+import './globals.css';
 
 export default declareComponent(CMSFilterSearch, {
   name: 'CMS Filter Search',

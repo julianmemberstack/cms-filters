@@ -5,7 +5,8 @@
       "./src/**/*.webflow.@(js|jsx|mjs|ts|tsx)"
     ],
     "description": "A flexible way to filter your CMS lists with Code Components.",
-    "id": "cms-filters"
+    "id": "cms-filters",
+    "bundleConfig": "./webpack.webflow.js"
   },
   "telemetry": {
     "global": {

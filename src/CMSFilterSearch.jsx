@@ -1,6 +1,8 @@
 import * as React from "react";
 import { useEffect, useState, useRef } from "react";
 import { fetchAllPages } from "./utils/fetchPages";
+import { Input } from "./components/ui/input";
+import { Button } from "./components/ui/button";
 
 export const CMSFilterSearch = ({
   placeholder = "Search...",
@@ -165,80 +167,40 @@ export const CMSFilterSearch = ({
 
   if (isLoading) {
     return (
-      <div
-        style={{
-          padding: "1em",
-          textAlign: "center",
-          color: "#666",
-          fontSize: "inherit",
-          fontFamily: "inherit",
-        }}
-      >
+      <div className="p-4 text-center text-muted-foreground font-[inherit]">
         Loading all items...
       </div>
     );
   }
 
   return (
-    <div style={{ width: "100%" }}>
+    <div className="w-full">
       {/* Search Input */}
-      <input
+      <Input
         type="text"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         placeholder={placeholder}
-        style={{
-          width: "100%",
-          padding: "0.5em 1em",
-          fontSize: "inherit",
-          fontFamily: "inherit",
-          border: "1px solid #ccc",
-          borderRadius: borderRadius,
-          boxSizing: "border-box",
-          marginBottom: "1em",
-        }}
+        className="mb-4 font-[inherit]"
       />
 
       {/* Results Info */}
-      <div
-        style={{
-          fontSize: "inherit",
-          fontFamily: "inherit",
-          color: "#666",
-          marginBottom: "1em",
-        }}
-      >
+      <div className="text-muted-foreground mb-4 font-[inherit]">
         Showing {filteredItems.length} result{filteredItems.length !== 1 ? "s" : ""}
       </div>
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5em",
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: "1em",
-            flexWrap: "wrap",
-          }}
-        >
+        <div className="flex gap-2 items-center justify-center mt-4 flex-wrap">
           {/* Previous Button */}
-          <button
+          <Button
             onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
-            style={{
-              padding: "0.5em 1em",
-              border: "1px solid #ccc",
-              borderRadius: borderRadius,
-              background: currentPage === 1 ? "#f5f5f5" : "#fff",
-              cursor: currentPage === 1 ? "not-allowed" : "pointer",
-              fontSize: "inherit",
-              fontFamily: "inherit",
-            }}
+            variant="outline"
+            className="font-[inherit]"
           >
             Previous
-          </button>
+          </Button>
 
           {/* Page Numbers */}
           {getPageNumbers().map((page, index) => {
@@ -246,11 +208,7 @@ export const CMSFilterSearch = ({
               return (
                 <span
                   key={`ellipsis-${index}`}
-                  style={{
-                    padding: "0.5em",
-                    fontSize: "inherit",
-                    fontFamily: "inherit",
-                  }}
+                  className="px-2 font-[inherit]"
                 >
                   ...
                 </span>
@@ -258,44 +216,29 @@ export const CMSFilterSearch = ({
             }
 
             return (
-              <button
+              <Button
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                style={{
-                  padding: "0.5em 0.75em",
-                  border: "1px solid #ccc",
-                  borderRadius: borderRadius,
-                  background: currentPage === page ? accentColor : "#fff",
-                  color: currentPage === page ? "#fff" : "#000",
-                  cursor: "pointer",
-                  fontSize: "inherit",
-                  fontFamily: "inherit",
-                  minWidth: "2.5em",
-                }}
+                variant={currentPage === page ? "default" : "outline"}
+                size="sm"
+                className="min-w-10 font-[inherit]"
               >
                 {page}
-              </button>
+              </Button>
             );
           })}
 
           {/* Next Button */}
-          <button
+          <Button
             onClick={() =>
               setCurrentPage((prev) => Math.min(totalPages, prev + 1))
             }
             disabled={currentPage === totalPages}
-            style={{
-              padding: "0.5em 1em",
-              border: "1px solid #ccc",
-              borderRadius: borderRadius,
-              background: currentPage === totalPages ? "#f5f5f5" : "#fff",
-              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-              fontSize: "inherit",
-              fontFamily: "inherit",
-            }}
+            variant="outline"
+            className="font-[inherit]"
           >
             Next
-          </button>
+          </Button>
         </div>
       )}
     </div>
