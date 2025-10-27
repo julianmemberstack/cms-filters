@@ -55,10 +55,10 @@ function PaginationDemo() {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         placeholder="Search items..."
-        className="mb-4 font-[inherit]"
+        className="mb-4"
       />
 
-      <div className="text-muted-foreground mb-4 font-[inherit]">
+      <div className="text-muted-foreground mb-4">
         Showing {filteredResults} results
       </div>
 
@@ -77,7 +77,6 @@ function PaginationDemo() {
             onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
             variant="outline"
-            className="font-[inherit]"
           >
             Previous
           </Button>
@@ -87,7 +86,7 @@ function PaginationDemo() {
               return (
                 <span
                   key={`ellipsis-${index}`}
-                  className="px-2 font-[inherit]"
+                  className="px-2"
                 >
                   ...
                 </span>
@@ -100,7 +99,7 @@ function PaginationDemo() {
                 onClick={() => setCurrentPage(page)}
                 variant={currentPage === page ? "default" : "outline"}
                 size="sm"
-                className="min-w-10 font-[inherit]"
+                className="min-w-10"
               >
                 {page}
               </Button>
@@ -113,7 +112,6 @@ function PaginationDemo() {
             }
             disabled={currentPage === totalPages}
             variant="outline"
-            className="font-[inherit]"
           >
             Next
           </Button>

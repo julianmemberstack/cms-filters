@@ -63,8 +63,10 @@
 @layer base {
   * {
     @apply border-border;
+    font-family: inherit !important;
   }
   body, :host {
     @apply bg-background text-foreground;
+    font-family: inherit !important;
   }
 }
