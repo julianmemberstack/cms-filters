@@ -4,7 +4,7 @@ import { declareComponent } from '@webflow/react';
 
 export default declareComponent(CMSFilterSearch, {
   name: 'CMS Filter Search',
-  description: 'Search and filter CMS list items by specified fields. Works with Finsweet fs-list-element and fs-list-field attributes.',
+  description: 'Search and filter CMS list items with pagination. Fetches all items across pages and caches them using IndexedDB. Works with Finsweet fs-list-element and fs-list-field attributes.',
   group: 'CMS Filters',
   props: {
     placeholder: props.Text({
@@ -26,6 +26,11 @@ export default declareComponent(CMSFilterSearch, {
       name: "Case Sensitive",
       description: "Enable case-sensitive search matching",
       defaultValue: false,
+    }),
+    itemsPerPage: props.Number({
+      name: "Items Per Page",
+      description: "Number of items to display per page. Leave empty to auto-detect from initial page.",
+      defaultValue: undefined,
     }),
   },
 });

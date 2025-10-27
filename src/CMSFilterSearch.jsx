@@ -1,43 +1,67 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { fetchAllPages } from "./utils/fetchPages";
 
 export const CMSFilterSearch = ({
   placeholder = "Search...",
   searchFields = "",
   targetList = '[fs-list-element="list"]',
   caseSensitive = false,
+  itemsPerPage: itemsPerPageProp,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [allItems, setAllItems] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(itemsPerPageProp || 10);
+  const [isLoading, setIsLoading] = useState(true);
+  const listElementRef = useRef(null);
 
+  // Fetch all pages on mount
   useEffect(() => {
-    // Find the target list element
-    const listElement = document.querySelector(targetList);
-    if (!listElement) return;
+    const loadAllPages = async () => {
+      setIsLoading(true);
+      try {
+        const { items, itemsPerPage: detectedItemsPerPage } =
+          await fetchAllPages(targetList, true);
 
-    // Get all direct children of the list (the items)
-    const items = Array.from(listElement.children);
+        // Use prop if provided, otherwise use detected value
+        const finalItemsPerPage = itemsPerPageProp || detectedItemsPerPage;
 
-    // Parse the searchFields prop into an array
+        setAllItems(items);
+        setFilteredItems(items);
+        setItemsPerPage(finalItemsPerPage);
+
+        // Find and store the list element reference
+        listElementRef.current = document.querySelector(targetList);
+      } catch (error) {
+        console.error("Error loading CMS pages:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAllPages();
+  }, [targetList, itemsPerPageProp]);
+
+  // Filter items whenever search term changes
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredItems(allItems);
+      setCurrentPage(1);
+      return;
+    }
+
     const fieldsToSearch = searchFields
       .split(",")
       .map((field) => field.trim())
       .filter((field) => field.length > 0);
 
-    // If no search term, show all items
-    if (!searchTerm.trim()) {
-      items.forEach((item) => {
-        item.style.display = "";
-      });
-      return;
-    }
-
-    // Prepare search term based on case sensitivity
     const searchValue = caseSensitive
       ? searchTerm
       : searchTerm.toLowerCase();
 
-    // Filter items
-    items.forEach((item) => {
+    const filtered = allItems.filter((item) => {
       let matchFound = false;
 
       // Search through specified fields only
@@ -73,25 +97,201 @@ export const CMSFilterSearch = ({
         });
       }
 
-      // Show or hide the item based on match
-      item.style.display = matchFound ? "" : "none";
+      return matchFound;
     });
-  }, [searchTerm, targetList, searchFields, caseSensitive]);
+
+    setFilteredItems(filtered);
+    setCurrentPage(1); // Reset to first page when search changes
+  }, [searchTerm, allItems, searchFields, caseSensitive]);
+
+  // Update DOM to show only current page items
+  useEffect(() => {
+    if (!listElementRef.current || isLoading) return;
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+
+    // Clear the list
+    listElementRef.current.innerHTML = "";
+
+    // Add filtered items for current page
+    const pageItems = filteredItems.slice(startIndex, endIndex);
+    pageItems.forEach((item) => {
+      listElementRef.current.appendChild(item.cloneNode(true));
+    });
+  }, [filteredItems, currentPage, itemsPerPage, isLoading]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 7;
+
+    if (totalPages <= maxPagesToShow) {
+      // Show all pages
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Show first, last, and pages around current
+      if (currentPage <= 3) {
+        // Near the start
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        // Near the end
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // In the middle
+        pages.push(1);
+        pages.push("...");
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
+
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          padding: "1em",
+          textAlign: "center",
+          color: "#666",
+        }}
+      >
+        Loading all items...
+      </div>
+    );
+  }
 
   return (
-    <input
-      type="text"
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      placeholder={placeholder}
-      style={{
-        width: "100%",
-        padding: "0.5em 1em",
-        fontSize: "16px",
-        border: "1px solid #ccc",
-        borderRadius: "4px",
-        boxSizing: "border-box",
-      }}
-    />
+    <div style={{ width: "100%" }}>
+      {/* Search Input */}
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder={placeholder}
+        style={{
+          width: "100%",
+          padding: "0.5em 1em",
+          fontSize: "16px",
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+          boxSizing: "border-box",
+          marginBottom: "1em",
+        }}
+      />
+
+      {/* Results Info */}
+      <div
+        style={{
+          fontSize: "14px",
+          color: "#666",
+          marginBottom: "1em",
+        }}
+      >
+        Showing {filteredItems.length} result{filteredItems.length !== 1 ? "s" : ""}
+      </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div
+          style={{
+            display: "flex",
+            gap: "0.5em",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: "1em",
+            flexWrap: "wrap",
+          }}
+        >
+          {/* Previous Button */}
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            style={{
+              padding: "0.5em 1em",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              background: currentPage === 1 ? "#f5f5f5" : "#fff",
+              cursor: currentPage === 1 ? "not-allowed" : "pointer",
+              fontSize: "14px",
+            }}
+          >
+            Previous
+          </button>
+
+          {/* Page Numbers */}
+          {getPageNumbers().map((page, index) => {
+            if (page === "...") {
+              return (
+                <span
+                  key={`ellipsis-${index}`}
+                  style={{
+                    padding: "0.5em",
+                    fontSize: "14px",
+                  }}
+                >
+                  ...
+                </span>
+              );
+            }
+
+            return (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                style={{
+                  padding: "0.5em 0.75em",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                  background: currentPage === page ? "#007bff" : "#fff",
+                  color: currentPage === page ? "#fff" : "#000",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  minWidth: "2.5em",
+                }}
+              >
+                {page}
+              </button>
+            );
+          })}
+
+          {/* Next Button */}
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+            }
+            disabled={currentPage === totalPages}
+            style={{
+              padding: "0.5em 1em",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              background: currentPage === totalPages ? "#f5f5f5" : "#fff",
+              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+              fontSize: "14px",
+            }}
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </div>
   );
 };
