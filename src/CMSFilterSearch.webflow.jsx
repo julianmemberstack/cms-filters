@@ -17,20 +17,20 @@ export default declareComponent(CMSFilterSearch, {
       description: "Comma-separated list of field identifiers to search (e.g., 'name,description,price'). Leave empty to search all fields.",
       defaultValue: "",
     }),
-    targetList: props.Text({
-      name: "Target List Selector",
-      description: "CSS selector for the list to filter",
-      defaultValue: '[fs-list-element="list"]',
-    }),
     caseSensitive: props.Boolean({
       name: "Case Sensitive",
       description: "Enable case-sensitive search matching",
       defaultValue: false,
     }),
-    itemsPerPage: props.Number({
-      name: "Items Per Page",
-      description: "Number of items to display per page. Leave empty to auto-detect from initial page.",
-      defaultValue: undefined,
+    accentColor: props.Text({
+      name: "Accent Color",
+      description: "Color for active page button (e.g., '#007bff', 'blue', 'rgb(0, 123, 255)')",
+      defaultValue: "#007bff",
+    }),
+    borderRadius: props.Text({
+      name: "Border Radius",
+      description: "Border radius for inputs and buttons (e.g., '4px', '8px', '0.5rem')",
+      defaultValue: "4px",
     }),
   },
 });

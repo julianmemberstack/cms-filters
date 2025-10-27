@@ -5,17 +5,18 @@ import { fetchAllPages } from "./utils/fetchPages";
 export const CMSFilterSearch = ({
   placeholder = "Search...",
   searchFields = "",
-  targetList = '[fs-list-element="list"]',
   caseSensitive = false,
-  itemsPerPage: itemsPerPageProp,
+  accentColor = "#007bff",
+  borderRadius = "4px",
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [allItems, setAllItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(itemsPerPageProp || 10);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
   const listElementRef = useRef(null);
+  const targetList = '[fs-list-element="list"]';
 
   // Fetch all pages on mount
   useEffect(() => {
@@ -25,12 +26,9 @@ export const CMSFilterSearch = ({
         const { items, itemsPerPage: detectedItemsPerPage } =
           await fetchAllPages(targetList, true);
 
-        // Use prop if provided, otherwise use detected value
-        const finalItemsPerPage = itemsPerPageProp || detectedItemsPerPage;
-
         setAllItems(items);
         setFilteredItems(items);
-        setItemsPerPage(finalItemsPerPage);
+        setItemsPerPage(detectedItemsPerPage);
 
         // Find and store the list element reference
         listElementRef.current = document.querySelector(targetList);
@@ -42,7 +40,7 @@ export const CMSFilterSearch = ({
     };
 
     loadAllPages();
-  }, [targetList, itemsPerPageProp]);
+  }, []);
 
   // Filter items whenever search term changes
   useEffect(() => {
@@ -172,6 +170,8 @@ export const CMSFilterSearch = ({
           padding: "1em",
           textAlign: "center",
           color: "#666",
+          fontSize: "inherit",
+          fontFamily: "inherit",
         }}
       >
         Loading all items...
@@ -190,9 +190,10 @@ export const CMSFilterSearch = ({
         style={{
           width: "100%",
           padding: "0.5em 1em",
-          fontSize: "16px",
+          fontSize: "inherit",
+          fontFamily: "inherit",
           border: "1px solid #ccc",
-          borderRadius: "4px",
+          borderRadius: borderRadius,
           boxSizing: "border-box",
           marginBottom: "1em",
         }}
@@ -201,7 +202,8 @@ export const CMSFilterSearch = ({
       {/* Results Info */}
       <div
         style={{
-          fontSize: "14px",
+          fontSize: "inherit",
+          fontFamily: "inherit",
           color: "#666",
           marginBottom: "1em",
         }}
@@ -228,10 +230,11 @@ export const CMSFilterSearch = ({
             style={{
               padding: "0.5em 1em",
               border: "1px solid #ccc",
-              borderRadius: "4px",
+              borderRadius: borderRadius,
               background: currentPage === 1 ? "#f5f5f5" : "#fff",
               cursor: currentPage === 1 ? "not-allowed" : "pointer",
-              fontSize: "14px",
+              fontSize: "inherit",
+              fontFamily: "inherit",
             }}
           >
             Previous
@@ -245,7 +248,8 @@ export const CMSFilterSearch = ({
                   key={`ellipsis-${index}`}
                   style={{
                     padding: "0.5em",
-                    fontSize: "14px",
+                    fontSize: "inherit",
+                    fontFamily: "inherit",
                   }}
                 >
                   ...
@@ -260,11 +264,12 @@ export const CMSFilterSearch = ({
                 style={{
                   padding: "0.5em 0.75em",
                   border: "1px solid #ccc",
-                  borderRadius: "4px",
-                  background: currentPage === page ? "#007bff" : "#fff",
+                  borderRadius: borderRadius,
+                  background: currentPage === page ? accentColor : "#fff",
                   color: currentPage === page ? "#fff" : "#000",
                   cursor: "pointer",
-                  fontSize: "14px",
+                  fontSize: "inherit",
+                  fontFamily: "inherit",
                   minWidth: "2.5em",
                 }}
               >
@@ -282,10 +287,11 @@ export const CMSFilterSearch = ({
             style={{
               padding: "0.5em 1em",
               border: "1px solid #ccc",
-              borderRadius: "4px",
+              borderRadius: borderRadius,
               background: currentPage === totalPages ? "#f5f5f5" : "#fff",
               cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-              fontSize: "14px",
+              fontSize: "inherit",
+              fontFamily: "inherit",
             }}
           >
             Next
