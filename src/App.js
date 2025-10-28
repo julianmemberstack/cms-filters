@@ -12,6 +12,7 @@ function PaginationDemo() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [calorieRange, setCalorieRange] = useState([0, 1000]);
+  const [priceRange, setPriceRange] = useState([0, 50]);
   const totalPages = 15; // Mock 15 pages
   const filteredResults = 142; // Mock results count
 
@@ -74,6 +75,24 @@ function PaginationDemo() {
           step={10}
           value={calorieRange}
           onValueChange={setCalorieRange}
+          className="w-full"
+        />
+      </div>
+
+      {/* Price Range Filter */}
+      <div className="mb-6 space-y-2">
+        <div className="flex justify-between items-center">
+          <label className="text-sm font-medium">Price Range</label>
+          <span className="text-sm text-muted-foreground">
+            ${priceRange[0].toFixed(2)} - ${priceRange[1].toFixed(2)}
+          </span>
+        </div>
+        <Slider
+          min={0}
+          max={50}
+          step={0.5}
+          value={priceRange}
+          onValueChange={setPriceRange}
           className="w-full"
         />
       </div>

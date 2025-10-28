@@ -15,9 +15,14 @@ export const CMSFilterSearch = ({
   minCalories = 0,
   maxCalories = 1000,
   calorieStep = 10,
+  enablePriceFilter = false,
+  minPrice = 0,
+  maxPrice = 50,
+  priceStep = 0.5,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [calorieRange, setCalorieRange] = useState([minCalories, maxCalories]);
+  const [priceRange, setPriceRange] = useState([minPrice, maxPrice]);
   const [allItems, setAllItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -114,12 +119,26 @@ export const CMSFilterSearch = ({
         }
       }
 
-      return textMatchFound && calorieMatchFound;
+      // Price range filter
+      let priceMatchFound = true; // If filter disabled, all items match
+      if (enablePriceFilter) {
+        const priceElement = item.querySelector('[fs-list-field="price"]');
+        if (priceElement) {
+          const priceText = priceElement.textContent || "";
+          const priceValue = parseFloat(priceText.replace(/[^0-9.]/g, ""));
+
+          if (!isNaN(priceValue)) {
+            priceMatchFound = priceValue >= priceRange[0] && priceValue <= priceRange[1];
+          }
+        }
+      }
+
+      return textMatchFound && calorieMatchFound && priceMatchFound;
     });
 
     setFilteredItems(filtered);
     setCurrentPage(1); // Reset to first page when filters change
-  }, [searchTerm, calorieRange, allItems, searchFields, caseSensitive, enableCalorieFilter]);
+  }, [searchTerm, calorieRange, priceRange, allItems, searchFields, caseSensitive, enableCalorieFilter, enablePriceFilter]);
 
   // Update DOM to show only current page items
   useEffect(() => {
@@ -257,6 +276,26 @@ export const CMSFilterSearch = ({
             step={calorieStep}
             value={calorieRange}
             onValueChange={setCalorieRange}
+            className="w-full"
+          />
+        </div>
+      )}
+
+      {/* Price Range Filter */}
+      {enablePriceFilter && (
+        <div className="mb-6 space-y-2">
+          <div className="flex justify-between items-center">
+            <label className="text-sm font-medium">Price Range</label>
+            <span className="text-sm text-muted-foreground">
+              ${priceRange[0].toFixed(2)} - ${priceRange[1].toFixed(2)}
+            </span>
+          </div>
+          <Slider
+            min={minPrice}
+            max={maxPrice}
+            step={priceStep}
+            value={priceRange}
+            onValueChange={setPriceRange}
             className="w-full"
           />
         </div>
