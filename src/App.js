@@ -1,6 +1,5 @@
 import './App.css';
 import './globals.css';
-import { Badge } from './Badge';
 import { CMSFilterSearch } from './CMSFilterSearch';
 import { useState } from 'react';
 import { Input } from './components/ui/input';
@@ -167,16 +166,6 @@ function App() {
         <div>
           <h1 className="text-3xl font-bold mb-6">CMS Filters - Component Testing</h1>
 
-          {/* Badge Examples */}
-          <section className="mb-8 p-6 border rounded-lg">
-            <h2 className="text-2xl font-semibold mb-4">Badge Component</h2>
-            <p className="text-muted-foreground mb-4">Testing shadcn/ui Badge with Tailwind v3</p>
-            <div className="flex gap-4 items-center">
-              <Badge text="Light Variant" variant="Light" />
-              <Badge text="Dark Variant" variant="Dark" />
-            </div>
-          </section>
-
           {/* CMS Filter Search Example */}
           <section className="p-6 border rounded-lg">
             <h2 className="text-2xl font-semibold mb-4">CMS Filter Search Component</h2>
@@ -199,10 +188,6 @@ function App() {
               Your project is now set up with shadcn/ui and Tailwind v3!
             </p>
             <div className="space-y-4">
-              <div className="flex gap-2">
-                <Badge text="Default" variant="Dark" />
-                <Badge text="Secondary" variant="Light" />
-              </div>
               <p className="text-sm">
                 All shadcn/ui components are available. Install more with:
                 <code className="block mt-2 p-2 bg-muted rounded">

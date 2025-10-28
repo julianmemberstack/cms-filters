@@ -110,43 +110,53 @@ export const CMSPagination = ({
     return pages;
   };
 
-  // Convert hex color to HSL for CSS variable
-  const hexToHSL = (hex) => {
-    // Remove # if present
-    hex = hex.replace(/^#/, '');
-
-    // Parse hex values
-    const r = parseInt(hex.substring(0, 2), 16) / 255;
-    const g = parseInt(hex.substring(2, 4), 16) / 255;
-    const b = parseInt(hex.substring(4, 6), 16) / 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h, s, l = (max + min) / 2;
-
-    if (max === min) {
-      h = s = 0;
-    } else {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-      switch (max) {
-        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-        case g: h = ((b - r) / d + 2) / 6; break;
-        case b: h = ((r - g) / d + 4) / 6; break;
-      }
+  // Convert hex color to HSL for CSS variable, or pass through CSS variables
+  const processColor = (color) => {
+    // If it's already a CSS variable, return it as-is
+    if (color.trim().startsWith('var(')) {
+      return color;
     }
 
-    h = Math.round(h * 360);
-    s = Math.round(s * 100);
-    l = Math.round(l * 100);
+    // If it's a hex color, convert to HSL
+    if (color.startsWith('#')) {
+      let hex = color.replace(/^#/, '');
 
-    return `${h} ${s}% ${l}%`;
+      // Parse hex values
+      const r = parseInt(hex.substring(0, 2), 16) / 255;
+      const g = parseInt(hex.substring(2, 4), 16) / 255;
+      const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+
+      if (max === min) {
+        h = s = 0;
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+          case g: h = ((b - r) / d + 2) / 6; break;
+          case b: h = ((r - g) / d + 4) / 6; break;
+        }
+      }
+
+      h = Math.round(h * 360);
+      s = Math.round(s * 100);
+      l = Math.round(l * 100);
+
+      return `${h} ${s}% ${l}%`;
+    }
+
+    // If it's neither, assume it's already in HSL format or another valid CSS value
+    return color;
   };
 
   // Create style object with CSS variables
   const customStyles = {
-    '--primary': hexToHSL(accentColor),
+    '--primary': processColor(accentColor),
     '--primary-foreground': '0 0% 100%',
     '--radius': borderRadius,
   };
