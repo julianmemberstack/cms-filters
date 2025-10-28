@@ -5,11 +5,13 @@ import { CMSFilterSearch } from './CMSFilterSearch';
 import { useState } from 'react';
 import { Input } from './components/ui/input';
 import { Button } from './components/ui/button';
+import { Slider } from './components/ui/slider';
 
 // Mock pagination demo component
 function PaginationDemo() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [calorieRange, setCalorieRange] = useState([0, 1000]);
   const totalPages = 15; // Mock 15 pages
   const filteredResults = 142; // Mock results count
 
@@ -57,6 +59,24 @@ function PaginationDemo() {
         placeholder="Search items..."
         className="mb-4"
       />
+
+      {/* Calorie Range Filter */}
+      <div className="mb-6 space-y-2">
+        <div className="flex justify-between items-center">
+          <label className="text-sm font-medium">Calorie Range</label>
+          <span className="text-sm text-muted-foreground">
+            {calorieRange[0]} - {calorieRange[1]} kcal
+          </span>
+        </div>
+        <Slider
+          min={0}
+          max={1000}
+          step={10}
+          value={calorieRange}
+          onValueChange={setCalorieRange}
+          className="w-full"
+        />
+      </div>
 
       <div className="text-muted-foreground mb-4">
         Showing {filteredResults} results

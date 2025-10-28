@@ -33,5 +33,25 @@ export default declareComponent(CMSFilterSearch, {
       description: "Border radius for inputs and buttons (e.g., '4px', '8px', '0.5rem')",
       defaultValue: "4px",
     }),
+    enableCalorieFilter: props.Boolean({
+      name: "Enable Calorie Filter",
+      description: "Show calorie range slider filter (requires fs-list-field='kcal' on CMS items)",
+      defaultValue: false,
+    }),
+    minCalories: props.Number({
+      name: "Min Calories",
+      description: "Minimum calorie value for the range slider",
+      defaultValue: 0,
+    }),
+    maxCalories: props.Number({
+      name: "Max Calories",
+      description: "Maximum calorie value for the range slider",
+      defaultValue: 1000,
+    }),
+    calorieStep: props.Number({
+      name: "Calorie Step",
+      description: "Step size for calorie slider adjustments",
+      defaultValue: 10,
+    }),
   },
 });

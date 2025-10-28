@@ -5,6 +5,9 @@
 @layer base {
   /* Support both :root (for local dev) and :host (for Shadow DOM) */
   :root, :host {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -63,10 +66,17 @@
 @layer base {
   * {
     @apply border-border;
-    font-family: inherit !important;
   }
-  body, :host {
+  body {
     @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+  }
+  :host {
+    @apply bg-background text-foreground;
+  }
+  :host * {
     font-family: inherit !important;
   }
 }

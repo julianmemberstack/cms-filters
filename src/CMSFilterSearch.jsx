@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { fetchAllPages } from "./utils/fetchPages";
 import { Input } from "./components/ui/input";
 import { Button } from "./components/ui/button";
+import { Slider } from "./components/ui/slider";
 
 export const CMSFilterSearch = ({
   placeholder = "Search...",
@@ -10,8 +11,13 @@ export const CMSFilterSearch = ({
   caseSensitive = false,
   accentColor = "#007bff",
   borderRadius = "4px",
+  enableCalorieFilter = false,
+  minCalories = 0,
+  maxCalories = 1000,
+  calorieStep = 10,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [calorieRange, setCalorieRange] = useState([minCalories, maxCalories]);
   const [allItems, setAllItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,14 +50,8 @@ export const CMSFilterSearch = ({
     loadAllPages();
   }, []);
 
-  // Filter items whenever search term changes
+  // Filter items whenever search term or calorie range changes
   useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredItems(allItems);
-      setCurrentPage(1);
-      return;
-    }
-
     const fieldsToSearch = searchFields
       .split(",")
       .map((field) => field.trim())
@@ -62,47 +62,64 @@ export const CMSFilterSearch = ({
       : searchTerm.toLowerCase();
 
     const filtered = allItems.filter((item) => {
-      let matchFound = false;
+      // Text search filter
+      let textMatchFound = !searchTerm.trim(); // If no search term, all items match text filter
 
-      // Search through specified fields only
-      if (fieldsToSearch.length > 0) {
-        fieldsToSearch.forEach((fieldIdentifier) => {
-          const fieldElements = item.querySelectorAll(
-            `[fs-list-field="${fieldIdentifier}"]`
-          );
+      if (searchTerm.trim()) {
+        // Search through specified fields only
+        if (fieldsToSearch.length > 0) {
+          fieldsToSearch.forEach((fieldIdentifier) => {
+            const fieldElements = item.querySelectorAll(
+              `[fs-list-field="${fieldIdentifier}"]`
+            );
 
-          fieldElements.forEach((fieldElement) => {
+            fieldElements.forEach((fieldElement) => {
+              const fieldText = fieldElement.textContent || "";
+              const textToSearch = caseSensitive
+                ? fieldText
+                : fieldText.toLowerCase();
+
+              if (textToSearch.includes(searchValue)) {
+                textMatchFound = true;
+              }
+            });
+          });
+        } else {
+          // If no specific fields specified, search all fs-list-field elements
+          const allFieldElements = item.querySelectorAll("[fs-list-field]");
+          allFieldElements.forEach((fieldElement) => {
             const fieldText = fieldElement.textContent || "";
             const textToSearch = caseSensitive
               ? fieldText
               : fieldText.toLowerCase();
 
             if (textToSearch.includes(searchValue)) {
-              matchFound = true;
+              textMatchFound = true;
             }
           });
-        });
-      } else {
-        // If no specific fields specified, search all fs-list-field elements
-        const allFieldElements = item.querySelectorAll("[fs-list-field]");
-        allFieldElements.forEach((fieldElement) => {
-          const fieldText = fieldElement.textContent || "";
-          const textToSearch = caseSensitive
-            ? fieldText
-            : fieldText.toLowerCase();
-
-          if (textToSearch.includes(searchValue)) {
-            matchFound = true;
-          }
-        });
+        }
       }
 
-      return matchFound;
+      // Calorie range filter
+      let calorieMatchFound = true; // If filter disabled, all items match
+      if (enableCalorieFilter) {
+        const kcalElement = item.querySelector('[fs-list-field="kcal"]');
+        if (kcalElement) {
+          const kcalText = kcalElement.textContent || "";
+          const kcalValue = parseFloat(kcalText.replace(/[^0-9.]/g, ""));
+
+          if (!isNaN(kcalValue)) {
+            calorieMatchFound = kcalValue >= calorieRange[0] && kcalValue <= calorieRange[1];
+          }
+        }
+      }
+
+      return textMatchFound && calorieMatchFound;
     });
 
     setFilteredItems(filtered);
-    setCurrentPage(1); // Reset to first page when search changes
-  }, [searchTerm, allItems, searchFields, caseSensitive]);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [searchTerm, calorieRange, allItems, searchFields, caseSensitive, enableCalorieFilter]);
 
   // Update DOM to show only current page items
   useEffect(() => {
@@ -224,6 +241,26 @@ export const CMSFilterSearch = ({
         placeholder={placeholder}
         className="mb-4"
       />
+
+      {/* Calorie Range Filter */}
+      {enableCalorieFilter && (
+        <div className="mb-6 space-y-2">
+          <div className="flex justify-between items-center">
+            <label className="text-sm font-medium">Calorie Range</label>
+            <span className="text-sm text-muted-foreground">
+              {calorieRange[0]} - {calorieRange[1]} kcal
+            </span>
+          </div>
+          <Slider
+            min={minCalories}
+            max={maxCalories}
+            step={calorieStep}
+            value={calorieRange}
+            onValueChange={setCalorieRange}
+            className="w-full"
+          />
+        </div>
+      )}
 
       {/* Results Info */}
       <div className="text-muted-foreground mb-4">
