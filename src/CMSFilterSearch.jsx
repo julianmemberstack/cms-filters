@@ -273,6 +273,7 @@ export const CMSFilterSearch = ({
   const customStyles = {
     '--primary': processColor(accentColor),
     '--primary-foreground': '0 0% 100%',
+    '--ring': processColor(accentColor),
     '--radius': borderRadius,
   };
 
