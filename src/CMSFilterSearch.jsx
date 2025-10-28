@@ -2,8 +2,9 @@ import * as React from "react";
 import { useEffect, useState, useRef } from "react";
 import { fetchAllPages } from "./utils/fetchPages";
 import { Input } from "./components/ui/input";
-import { Button } from "./components/ui/button";
 import { Slider } from "./components/ui/slider";
+
+const STORAGE_KEY = "cms-pagination-state";
 
 export const CMSFilterSearch = ({
   placeholder = "Search...",
@@ -165,49 +166,40 @@ export const CMSFilterSearch = ({
     });
   }, [filteredItems, currentPage, itemsPerPage, isLoading]);
 
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  // Sync pagination state to localStorage
+  useEffect(() => {
+    if (isLoading) return;
 
-  // Generate page numbers to display
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxPagesToShow = 7;
+    const paginationState = {
+      totalItems: filteredItems.length,
+      itemsPerPage,
+      currentPage,
+    };
 
-    if (totalPages <= maxPagesToShow) {
-      // Show all pages
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Show first, last, and pages around current
-      if (currentPage <= 3) {
-        // Near the start
-        for (let i = 1; i <= 5; i++) {
-          pages.push(i);
-        }
-        pages.push("...");
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        // Near the end
-        pages.push(1);
-        pages.push("...");
-        for (let i = totalPages - 4; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        // In the middle
-        pages.push(1);
-        pages.push("...");
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push("...");
-        pages.push(totalPages);
-      }
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(paginationState));
+      // Dispatch custom event to notify pagination component in same window
+      window.dispatchEvent(new CustomEvent("cms-pagination-update"));
+    } catch (error) {
+      console.error("Error writing pagination state to localStorage:", error);
     }
+  }, [filteredItems.length, itemsPerPage, currentPage, isLoading]);
 
-    return pages;
-  };
+  // Listen for page changes from pagination component
+  useEffect(() => {
+    const handlePaginationChange = (event) => {
+      const { currentPage: newPage } = event.detail;
+      if (newPage !== currentPage) {
+        setCurrentPage(newPage);
+      }
+    };
+
+    window.addEventListener("cms-pagination-change", handlePaginationChange);
+
+    return () => {
+      window.removeEventListener("cms-pagination-change", handlePaginationChange);
+    };
+  }, [currentPage]);
 
   // Convert hex color to HSL for CSS variable
   const hexToHSL = (hex) => {
@@ -313,56 +305,6 @@ export const CMSFilterSearch = ({
       <div className="text-muted-foreground mb-4">
         Showing {filteredItems.length} result{filteredItems.length !== 1 ? "s" : ""}
       </div>
-
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex gap-2 items-center justify-center mt-4 flex-wrap">
-          {/* Previous Button */}
-          <Button
-            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
-            variant="outline"
-          >
-            Previous
-          </Button>
-
-          {/* Page Numbers */}
-          {getPageNumbers().map((page, index) => {
-            if (page === "...") {
-              return (
-                <span
-                  key={`ellipsis-${index}`}
-                  className="px-2"
-                >
-                  ...
-                </span>
-              );
-            }
-
-            return (
-              <Button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                variant={currentPage === page ? "default" : "outline"}
-                className="min-w-10"
-              >
-                {page}
-              </Button>
-            );
-          })}
-
-          {/* Next Button */}
-          <Button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-            }
-            disabled={currentPage === totalPages}
-            variant="outline"
-          >
-            Next
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
