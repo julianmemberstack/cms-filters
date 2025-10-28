@@ -11,18 +11,26 @@ export const CMSFilterSearch = ({
   caseSensitive = false,
   accentColor = "#007bff",
   borderRadius = "4px",
-  enableCalorieFilter = false,
-  minCalories = 0,
-  maxCalories = 1000,
-  calorieStep = 10,
-  enablePriceFilter = false,
-  minPrice = 0,
-  maxPrice = 50,
-  priceStep = 0.5,
+  enableSlider1 = false,
+  slider1Field = "kcal",
+  slider1Label = "Calorie Range",
+  slider1Min = 0,
+  slider1Max = 1000,
+  slider1Step = 10,
+  slider1FormatText = " kcal",
+  slider1FormatAsPrefix = false,
+  enableSlider2 = false,
+  slider2Field = "price",
+  slider2Label = "Price Range",
+  slider2Min = 0,
+  slider2Max = 50,
+  slider2Step = 0.5,
+  slider2FormatText = "$",
+  slider2FormatAsPrefix = true,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [calorieRange, setCalorieRange] = useState([minCalories, maxCalories]);
-  const [priceRange, setPriceRange] = useState([minPrice, maxPrice]);
+  const [slider1Range, setSlider1Range] = useState([slider1Min, slider1Max]);
+  const [slider2Range, setSlider2Range] = useState([slider2Min, slider2Max]);
   const [allItems, setAllItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -105,40 +113,40 @@ export const CMSFilterSearch = ({
         }
       }
 
-      // Calorie range filter
-      let calorieMatchFound = true; // If filter disabled, all items match
-      if (enableCalorieFilter) {
-        const kcalElement = item.querySelector('[fs-list-field="kcal"]');
-        if (kcalElement) {
-          const kcalText = kcalElement.textContent || "";
-          const kcalValue = parseFloat(kcalText.replace(/[^0-9.]/g, ""));
+      // Range Slider 1 filter
+      let slider1MatchFound = true; // If filter disabled, all items match
+      if (enableSlider1) {
+        const slider1Element = item.querySelector(`[fs-list-field="${slider1Field}"]`);
+        if (slider1Element) {
+          const slider1Text = slider1Element.textContent || "";
+          const slider1Value = parseFloat(slider1Text.replace(/[^0-9.]/g, ""));
 
-          if (!isNaN(kcalValue)) {
-            calorieMatchFound = kcalValue >= calorieRange[0] && kcalValue <= calorieRange[1];
+          if (!isNaN(slider1Value)) {
+            slider1MatchFound = slider1Value >= slider1Range[0] && slider1Value <= slider1Range[1];
           }
         }
       }
 
-      // Price range filter
-      let priceMatchFound = true; // If filter disabled, all items match
-      if (enablePriceFilter) {
-        const priceElement = item.querySelector('[fs-list-field="price"]');
-        if (priceElement) {
-          const priceText = priceElement.textContent || "";
-          const priceValue = parseFloat(priceText.replace(/[^0-9.]/g, ""));
+      // Range Slider 2 filter
+      let slider2MatchFound = true; // If filter disabled, all items match
+      if (enableSlider2) {
+        const slider2Element = item.querySelector(`[fs-list-field="${slider2Field}"]`);
+        if (slider2Element) {
+          const slider2Text = slider2Element.textContent || "";
+          const slider2Value = parseFloat(slider2Text.replace(/[^0-9.]/g, ""));
 
-          if (!isNaN(priceValue)) {
-            priceMatchFound = priceValue >= priceRange[0] && priceValue <= priceRange[1];
+          if (!isNaN(slider2Value)) {
+            slider2MatchFound = slider2Value >= slider2Range[0] && slider2Value <= slider2Range[1];
           }
         }
       }
 
-      return textMatchFound && calorieMatchFound && priceMatchFound;
+      return textMatchFound && slider1MatchFound && slider2MatchFound;
     });
 
     setFilteredItems(filtered);
     setCurrentPage(1); // Reset to first page when filters change
-  }, [searchTerm, calorieRange, priceRange, allItems, searchFields, caseSensitive, enableCalorieFilter, enablePriceFilter]);
+  }, [searchTerm, slider1Range, slider2Range, allItems, searchFields, caseSensitive, enableSlider1, enableSlider2, slider1Field, slider2Field]);
 
   // Update DOM to show only current page items
   useEffect(() => {
@@ -261,41 +269,41 @@ export const CMSFilterSearch = ({
         className="mb-4"
       />
 
-      {/* Calorie Range Filter */}
-      {enableCalorieFilter && (
+      {/* Range Slider 1 */}
+      {enableSlider1 && (
         <div className="mb-6 space-y-2">
           <div className="flex justify-between items-center">
-            <label className="text-sm font-medium">Calorie Range</label>
+            <label className="text-sm font-medium">{slider1Label}</label>
             <span className="text-sm text-muted-foreground">
-              {calorieRange[0]} - {calorieRange[1]} kcal
+              {slider1FormatAsPrefix ? `${slider1FormatText}${slider1Range[0]}` : `${slider1Range[0]}${slider1FormatText}`} - {slider1FormatAsPrefix ? `${slider1FormatText}${slider1Range[1]}` : `${slider1Range[1]}${slider1FormatText}`}
             </span>
           </div>
           <Slider
-            min={minCalories}
-            max={maxCalories}
-            step={calorieStep}
-            value={calorieRange}
-            onValueChange={setCalorieRange}
+            min={slider1Min}
+            max={slider1Max}
+            step={slider1Step}
+            value={slider1Range}
+            onValueChange={setSlider1Range}
             className="w-full"
           />
         </div>
       )}
 
-      {/* Price Range Filter */}
-      {enablePriceFilter && (
+      {/* Range Slider 2 */}
+      {enableSlider2 && (
         <div className="mb-6 space-y-2">
           <div className="flex justify-between items-center">
-            <label className="text-sm font-medium">Price Range</label>
+            <label className="text-sm font-medium">{slider2Label}</label>
             <span className="text-sm text-muted-foreground">
-              ${priceRange[0].toFixed(2)} - ${priceRange[1].toFixed(2)}
+              {slider2FormatAsPrefix ? `${slider2FormatText}${slider2Range[0].toFixed(2)}` : `${slider2Range[0].toFixed(2)}${slider2FormatText}`} - {slider2FormatAsPrefix ? `${slider2FormatText}${slider2Range[1].toFixed(2)}` : `${slider2Range[1].toFixed(2)}${slider2FormatText}`}
             </span>
           </div>
           <Slider
-            min={minPrice}
-            max={maxPrice}
-            step={priceStep}
-            value={priceRange}
-            onValueChange={setPriceRange}
+            min={slider2Min}
+            max={slider2Max}
+            step={slider2Step}
+            value={slider2Range}
+            onValueChange={setSlider2Range}
             className="w-full"
           />
         </div>
