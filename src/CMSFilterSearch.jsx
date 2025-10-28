@@ -201,21 +201,13 @@ export const CMSFilterSearch = ({
     };
   }, [currentPage]);
 
-  // Convert hex color to HSL for CSS variable, or pass through CSS variables
+  // Convert any color format to HSL for CSS variable
   const processColor = (color) => {
-    // If it's already a CSS variable, return it as-is
-    if (color.trim().startsWith('var(')) {
-      return color;
-    }
-
-    // If it's a hex color, convert to HSL
-    if (color.startsWith('#')) {
-      let hex = color.replace(/^#/, '');
-
-      // Parse hex values
-      const r = parseInt(hex.substring(0, 2), 16) / 255;
-      const g = parseInt(hex.substring(2, 4), 16) / 255;
-      const b = parseInt(hex.substring(4, 6), 16) / 255;
+    // Helper function to convert RGB to HSL
+    const rgbToHSL = (r, g, b) => {
+      r /= 255;
+      g /= 255;
+      b /= 255;
 
       const max = Math.max(r, g, b);
       const min = Math.min(r, g, b);
@@ -239,9 +231,41 @@ export const CMSFilterSearch = ({
       l = Math.round(l * 100);
 
       return `${h} ${s}% ${l}%`;
+    };
+
+    // If it's a CSS variable, we need to resolve it
+    if (color.trim().startsWith('var(')) {
+      try {
+        // Create a temporary element to compute the variable value
+        const tempDiv = document.createElement('div');
+        tempDiv.style.color = color;
+        document.body.appendChild(tempDiv);
+        const computedColor = window.getComputedStyle(tempDiv).color;
+        document.body.removeChild(tempDiv);
+
+        // Parse the computed RGB color
+        const rgbMatch = computedColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (rgbMatch) {
+          const r = parseInt(rgbMatch[1]);
+          const g = parseInt(rgbMatch[2]);
+          const b = parseInt(rgbMatch[3]);
+          return rgbToHSL(r, g, b);
+        }
+      } catch (e) {
+        console.warn('Failed to resolve CSS variable:', color);
+      }
     }
 
-    // If it's neither, assume it's already in HSL format or another valid CSS value
+    // If it's a hex color, convert to HSL
+    if (color.startsWith('#')) {
+      let hex = color.replace(/^#/, '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      return rgbToHSL(r, g, b);
+    }
+
+    // If it's already in HSL format or another valid CSS value, return as-is
     return color;
   };
 
